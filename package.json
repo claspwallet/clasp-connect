@@ -1,0 +1,76 @@
+{
+  "name": "clasp-connect",
+  "version": "0.4.0",
+  "description": "Dapp SDK for the Clasp wallet — XRPL popup signing and an XRPL EVM wagmi connector. Zero runtime dependencies.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/claspwallet/clasp-connect.git"
+  },
+  "bugs": {
+    "url": "https://github.com/claspwallet/clasp-connect/issues"
+  },
+  "homepage": "https://claspwallet.com/developers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./wagmi": {
+      "types": "./dist/wagmi.d.ts",
+      "default": "./dist/wagmi.js"
+    },
+    "./rainbowkit": {
+      "types": "./dist/rainbowkit.d.ts",
+      "default": "./dist/rainbowkit.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.19"
+  },
+  "peerDependencies": {
+    "@wagmi/core": "^2.9.0 || ^3.0.0",
+    "viem": "2.x"
+  },
+  "peerDependenciesMeta": {
+    "@wagmi/core": {
+      "optional": true
+    },
+    "viem": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.11",
+    "@wagmi/core": "^2.22.1",
+    "ripple-binary-codec": "^2.11.0",
+    "typescript": "^5.9.3",
+    "viem": "^2.55.10",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "tsc -p tsconfig.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "xrpl",
+    "xrpl-evm",
+    "wallet",
+    "passkey",
+    "wagmi",
+    "connector",
+    "rainbowkit"
+  ]
+}
