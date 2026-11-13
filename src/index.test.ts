@@ -6,7 +6,7 @@
  * the instance's busy flag.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ClaspConnect } from "./index";
+import { ClaspConnect, ClaspError } from "./index";
 
 const WALLET = "https://wallet.test";
 const READY = { clasp: "ready", v: 1 };
@@ -139,6 +139,32 @@ describe("handshake", () => {
       data: { clasp: "response", v: 1, id: envelope.id, ok: true, result },
     });
     await expect(p).resolves.toEqual(result);
+  });
+
+  it("a failed signAndSubmit carries the hash and the ledger's code, and drops them when malformed", async () => {
+    const run = async (error: Record<string, unknown>) => {
+      const sdk = new ClaspConnect({ walletUrl: WALLET });
+      const popup = makeFakePopup();
+      fakeWin.open.mockReturnValueOnce(popup);
+      const p = sdk.signAndSubmit({ tx: { TransactionType: "Payment" } });
+      dispatch({ origin: WALLET, source: popup, data: READY });
+      const [envelope] = popup.postMessage.mock.calls[0] as [{ id: string }, string];
+      dispatch({ origin: WALLET, source: popup, data: { clasp: "response", v: 1, id: envelope.id, ok: false, error } });
+      return p.catch((e: unknown) => e as ClaspError);
+    };
+
+    const hash = "C".repeat(64);
+    const failed = await run({ code: "tx_failed", message: "Not enough XRP.", hash, engineResult: "tecUNFUNDED_PAYMENT" });
+    expect(failed).toBeInstanceOf(ClaspError);
+    expect(failed).toMatchObject({ code: "tx_failed", hash, engineResult: "tecUNFUNDED_PAYMENT" });
+
+    const unconfirmed = await run({ code: "not_confirmed", message: "Not confirmed yet.", hash });
+    expect(unconfirmed).toMatchObject({ code: "not_confirmed", hash });
+    expect(unconfirmed.engineResult).toBeUndefined();
+
+    const junk = await run({ code: "tx_failed", message: "x", hash: "<img>", engineResult: "rm -rf" });
+    expect(junk.hash).toBeUndefined();
+    expect(junk.engineResult).toBeUndefined();
   });
 
   it("answers ready exactly once", async () => {

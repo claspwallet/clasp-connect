@@ -25,7 +25,18 @@ export type ClaspErrorCode =
   | "busy"
   | "popup_blocked";
 
-export type ClaspError = { code: ClaspErrorCode; message: string };
+export type ClaspError = {
+  code: ClaspErrorCode;
+  message: string;
+  /**
+   * `sign_and_submit` only: the signed transaction's hash, once it reached the
+   * network (`tx_failed` after the ledger applied a `tec`, or `not_confirmed`).
+   * Look it up before asking again: an unconfirmed transaction may still apply.
+   */
+  hash?: string;
+  /** `sign_and_submit` `tx_failed` only: the ledger's result code, e.g. `tecUNFUNDED_PAYMENT`. */
+  engineResult?: string;
+};
 
 /* ---------- methods ---------- */
 

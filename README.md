@@ -170,6 +170,12 @@ popup blocked / timed out / busy / not confirmed (viem shows its canned
 text for `4001`, so only a real user "no" may wear that code), `-32003`
 failed transaction, `-32603` internal.
 
+On XRPL, a `signAndSubmit` that reached the network and then failed rejects
+with a `ClaspError` that also carries `hash` (`tx_failed` and
+`not_confirmed`) and `engineResult` (`tx_failed`, e.g.
+`tecUNFUNDED_PAYMENT`). An unconfirmed transaction may still apply, so look
+the hash up before asking again.
+
 ## Source and issues
 
 This repository is a copy of the SDK from Clasp's main repository, where it

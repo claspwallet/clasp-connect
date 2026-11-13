@@ -25,14 +25,28 @@ import {
 } from "./protocol.js";
 
 export class ClaspError extends Error {
+  /** The signed transaction's hash, when a failed `signAndSubmit` reached the network. */
+  readonly hash?: string;
+  /** The ledger's result code, when a `signAndSubmit` failed with one (e.g. `tecUNFUNDED_PAYMENT`). */
+  readonly engineResult?: string;
+
   constructor(
     public readonly code: ClaspErrorCode,
     message: string,
+    details: { hash?: unknown; engineResult?: unknown } = {},
   ) {
     super(message);
     this.name = "ClaspError";
+    // Kept only when well-formed: they come from another window.
+    if (typeof details.hash === "string" && HASH_RE.test(details.hash)) this.hash = details.hash;
+    if (typeof details.engineResult === "string" && ENGINE_RESULT_RE.test(details.engineResult)) {
+      this.engineResult = details.engineResult;
+    }
   }
 }
+
+const HASH_RE = /^[0-9A-F]{64}$/i;
+const ENGINE_RESULT_RE = /^te[cflmrs][A-Z_]{1,40}$/;
 
 export type ClaspConnectOptions = {
   /**
@@ -159,7 +173,7 @@ export class ClaspConnect {
         if (isClaspResponse(e.data) && e.data.id === id) {
           const msg = e.data;
           if (msg.ok) finish(() => resolve(msg.result));
-          else finish(() => reject(new ClaspError(msg.error.code, msg.error.message)));
+          else finish(() => reject(new ClaspError(msg.error.code, msg.error.message, msg.error)));
         }
       };
 
